@@ -3,123 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valve Control</title>
+    <title>Valve Control Interface</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            background: #f7f7fa;
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
         }
-        .container {
+        .dashboard {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+            padding: 40px 32px 32px 32px;
+            max-width: 420px;
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
         }
-        h2 {
+        .header {
+            font-size: 2.1em;
+            font-weight: 700;
             text-align: center;
-            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            color: #222;
+            margin-bottom: 0;
         }
-        .slider-container {
-            margin-bottom: 20px;
+        .status-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
+        .status-icon {
+            font-size: 2.8em;
+            color: #d32f2f;
+            filter: drop-shadow(0 0 8px #d32f2f88);
         }
-        input[type="range"] {
+        .status-text {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #d32f2f;
+            letter-spacing: 0.5px;
+        }
+        .valve-graphic {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .valve-svg {
+            width: 110px;
+            height: 110px;
+            margin-bottom: 10px;
+        }
+        .valve-svg .glow {
+            filter: drop-shadow(0 0 16px #d32f2f88);
+        }
+        .position-display {
+            font-size: 2.3em;
+            font-weight: 700;
+            color: #222;
+            background: #f7f7fa;
+            border-radius: 10px;
+            padding: 6px 24px;
+            margin-bottom: 0;
+            box-shadow: 0 2px 8px rgba(211,47,47,0.07);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: stretch;
+        }
+        .slider-label {
+            font-size: 1em;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+        }
+        .slider {
             width: 100%;
+            accent-color: #1976d2;
+            height: 4px;
+            margin-bottom: 0;
         }
-        .input-container {
+        .input-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
         }
-        input[type="number"] {
-            width: 100%;
-            padding: 5px;
+        .input-label {
+            font-size: 1em;
+            font-weight: 500;
+            color: #444;
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .input-label .gear {
+            font-size: 1.1em;
+            margin-right: 4px;
+        }
+        .numeric-input {
+            width: 80px;
+            font-size: 1.1em;
+            padding: 6px 8px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 6px;
+            background: #f7f7fa;
+            font-family: inherit;
         }
-        .color-indicator {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+        .apply-btn {
+            font-size: 1em;
+            font-weight: 600;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .status {
-            text-align: center;
-            font-weight: bold;
+        .apply-btn:hover {
+            background: #1452a0;
+        }
+        @media (max-width: 600px) {
+            .dashboard {
+                padding: 18px 6px 16px 6px;
+                max-width: 98vw;
+            }
+            .header {
+                font-size: 1.3em;
+            }
+            .valve-svg {
+                width: 80px;
+                height: 80px;
+            }
+            .position-display {
+                font-size: 1.3em;
+                padding: 4px 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Valve Control</h2>
-        <div class="slider-container">
-            <label for="valve-slider">Valve Position</label>
-            <input type="range" id="valve-slider" min="0" max="1000" value="0">
+    <div class="dashboard">
+        <div class="header">Valve Control Interface</div>
+        <div class="status-indicator">
+            <span class="status-icon">🔒</span>
+            <span class="status-text" id="status-text">Valve Closed</span>
         </div>
-        <div class="input-container">
-            <div style="flex-grow: 1;">
-                <label for="valve-input">Numeric Setting (0-1000)</label>
-                <input type="number" id="valve-input" min="0" max="1000" value="0">
+        <div class="valve-graphic">
+            <!-- Animated swirling liquid/gas SVG (approx. 60% fill, amber/yellow-green) -->
+            <svg class="valve-svg" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="liquidGradient" cx="55" cy="55" r="44" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#fffbe6" />
+                        <stop offset="60%" stop-color="#fbc02d" />
+                        <stop offset="100%" stop-color="#388e3c" />
+                    </radialGradient>
+                    <filter id="liquidGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#fbc02d" flood-opacity="0.5" />
+                    </filter>
+                </defs>
+                <!-- Outer circle -->
+                <circle cx="55" cy="55" r="44" fill="#fff" stroke="#eee" stroke-width="6" />
+                <!-- Animated liquid/gas fill (approx. 60%) -->
+                <g>
+                    <path id="liquid-wave" d="M11,55 Q35,40 55,66 Q75,92 99,55 Q75,70 55,44 Q35,18 11,55 Z" fill="url(#liquidGradient)" filter="url(#liquidGlow)">
+                        <animateTransform attributeName="transform" type="rotate" from="0 55 55" to="360 55 55" dur="3s" repeatCount="indefinite" />
+                    </path>
+                    <!-- Highlights and shadows for depth -->
+                    <ellipse cx="55" cy="65" rx="28" ry="8" fill="#fffbe6" opacity="0.3">
+                        <animate attributeName="rx" values="28;32;28" dur="2s" repeatCount="indefinite" />
+                    </ellipse>
+                    <ellipse cx="55" cy="45" rx="18" ry="5" fill="#388e3c" opacity="0.15">
+                        <animate attributeName="rx" values="18;22;18" dur="2.5s" repeatCount="indefinite" />
+                    </ellipse>
+                </g>
+                <!-- Center circle for valve hub -->
+                <circle cx="55" cy="55" r="22" fill="#fff" stroke="#eee" stroke-width="2" />
+            </svg>
+            <div class="position-display" id="position-display">0</div>
+        </div>
+        <div class="controls">
+            <label class="slider-label" for="valve-slider">Valve Position</label>
+            <input type="range" class="slider" id="valve-slider" min="0" max="1000" value="0">
+            <div class="input-row">
+                <label class="input-label" for="valve-input"><span class="gear">⚙️</span>Numeric Setting (0-1000)</label>
+                <input type="number" class="numeric-input" id="valve-input" min="0" max="1000" value="0">
+                <button class="apply-btn" id="apply-btn">Set Valve</button>
             </div>
-            <div class="color-indicator"></div>
         </div>
-        <div class="status">Valve Closed</div>
     </div>
-
     <script>
         const slider = document.getElementById('valve-slider');
         const input = document.getElementById('valve-input');
-        const colorIndicator = document.querySelector('.color-indicator');
-        const status = document.querySelector('.status');
+        const positionDisplay = document.getElementById('position-display');
+        const statusText = document.getElementById('status-text');
+        const statusIcon = document.querySelector('.status-icon');
+        const applyBtn = document.getElementById('apply-btn');
 
-        function updateValve(value) {
+        let valveValue = 0;
+        const minValue = 0;
+        const maxValue = 1000;
+
+        function setValve(value) {
+            value = Math.round(Math.min(maxValue, Math.max(minValue, value)));
+            valveValue = value;
             slider.value = value;
             input.value = value;
-            updateColorAndStatus(value);
+            positionDisplay.textContent = value;
+            updateStatus(value);
+            updateValveGraphic(value);
         }
 
-        function updateColorAndStatus(value) {
-            let color, statusText;
-            if (value == 0) {
-                color = 'red';
-                statusText = 'Valve Closed';
-            } else if (value < 250) {
-                color = 'orange';
-                statusText = 'Valve Partially Open';
-            } else if (value < 750) {
-                color = 'yellow';
-                statusText = 'Valve Partially Open';
+        function updateStatus(value) {
+            if (value === 0) {
+                statusText.textContent = 'Valve Closed';
+                statusText.style.color = '#d32f2f';
+                statusIcon.textContent = '🔒';
+                statusIcon.style.color = '#d32f2f';
             } else if (value < 1000) {
-                color = 'green';
-                statusText = 'Valve Partially Open';
+                statusText.textContent = 'Valve Partially Open';
+                statusText.style.color = '#388e3c';
+                statusIcon.textContent = '🟢';
+                statusIcon.style.color = '#388e3c';
             } else {
-                color = 'green';
-                statusText = 'Valve Fully Open';
+                statusText.textContent = 'Valve Fully Open';
+                statusText.style.color = '#1976d2';
+                statusIcon.textContent = '🔓';
+                statusIcon.style.color = '#1976d2';
             }
-            colorIndicator.style.backgroundColor = color;
-            status.textContent = statusText;
         }
 
-        slider.addEventListener('input', (e) => updateValve(e.target.value));
+        function updateValveGraphic(value) {
+            // Animate swirling liquid/gas fill and speed
+            const wave = document.getElementById('liquid-wave');
+            // Find the animateTransform element inside the wave
+            let animateTransform = null;
+            if (wave) {
+                // SVG DOM: <animateTransform> is a child of <path>
+                animateTransform = wave.querySelector('animateTransform');
+                // Fallback for browsers: getElementsByTagName
+                if (!animateTransform) {
+                    const children = wave.getElementsByTagName('animateTransform');
+                    if (children.length > 0) animateTransform = children[0];
+                }
+                // Set fill and opacity
+                if (value === 0) {
+                    wave.setAttribute('fill', 'url(#liquidGradient)');
+                    wave.setAttribute('filter', 'url(#liquidGlow)');
+                    wave.setAttribute('opacity', '0.2');
+                    // Pause animation by setting dur very high
+                    if (animateTransform) animateTransform.setAttribute('dur', '10000s');
+                } else if (value < 750) {
+                    wave.setAttribute('fill', 'url(#liquidGradient)');
+                    wave.setAttribute('filter', 'url(#liquidGlow)');
+                    wave.setAttribute('opacity', '0.7');
+                    // Swirl speed: interpolate between 6s (closed) and 2s (almost open)
+                    let dur = 6 - (value / maxValue) * 4; // 6s to 2s
+                    if (animateTransform) animateTransform.setAttribute('dur', dur.toFixed(2) + 's');
+                } else {
+                    wave.setAttribute('fill', 'url(#liquidGradient)');
+                    wave.setAttribute('filter', 'url(#liquidGlow)');
+                    wave.setAttribute('opacity', '1');
+                    // Fastest swirl when fully open
+                    if (animateTransform) animateTransform.setAttribute('dur', '1s');
+                }
+            }
+        }
 
-        input.addEventListener('change', (e) => {
-            let value = parseInt(e.target.value);
-            value = Math.min(1000, Math.max(0, value));
-            updateValve(value);
+        slider.addEventListener('input', (e) => {
+            setValve(Number(e.target.value));
         });
 
-      
-        updateValve(0);
+        input.addEventListener('change', (e) => {
+            setValve(Number(e.target.value));
+        });
+
+        applyBtn.addEventListener('click', () => {
+            setValve(Number(input.value));
+        });
+
+        // Initialize UI
+        setValve(0);
     </script>
 </body>
 </html>
